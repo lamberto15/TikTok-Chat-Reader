@@ -3,95 +3,160 @@ require('dotenv').config();
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { PrismaClient } = require('@prisma/client');
 const { TikTokConnectionWrapper, getGlobalConnectionCount } = require('./connectionWrapper');
-const { clientBlocked } = require('./limiter');
 
 const app = express();
 const httpServer = createServer(app);
 
-// Enable cross origin resource sharing
 const io = new Server(httpServer, {
     cors: {
         origin: '*'
     }
 });
 
+// Socket.IO connection event
+io.on('connection', async (socket) => {
+    console.log(`User connected: ${socket.id}`);
 
-io.on('connection', (socket) => {
-    let tiktokConnectionWrapper;
 
-    console.info('New connection from origin', socket.handshake.headers['origin'] || socket.handshake.headers['referer']);
-
-    socket.on('setUniqueId', (uniqueId, options) => {
-
-        // Prohibit the client from specifying these options (for security reasons)
-        if (typeof options === 'object' && options) {
-            delete options.requestOptions;
-            delete options.websocketOptions;
-        } else {
-            options = {};
-        }
-
-        // Session ID in .env file is optional
-        if (process.env.SESSIONID) {
-            options.sessionId = process.env.SESSIONID;
-            console.info('Using SessionId');
-        }
-
-        // Check if rate limit exceeded
-        if (process.env.ENABLE_RATE_LIMIT && clientBlocked(io, socket)) {
-            socket.emit('tiktokDisconnected', 'You have opened too many connections or made too many connection requests. Please reduce the number of connections/requests or host your own server instance. The connections are limited to avoid that the server IP gets blocked by TokTok.');
-            return;
-        }
-
-        // Connect to the given username (uniqueId)
-        try {
-            tiktokConnectionWrapper = new TikTokConnectionWrapper(uniqueId, options, true);
-            tiktokConnectionWrapper.connect();
-        } catch (err) {
-            socket.emit('tiktokDisconnected', err.toString());
-            return;
-        }
-
-        // Redirect wrapper control events once
-        tiktokConnectionWrapper.once('connected', state => socket.emit('tiktokConnected', state));
-        tiktokConnectionWrapper.once('disconnected', reason => socket.emit('tiktokDisconnected', reason));
-
-        // Notify client when stream ends
-        tiktokConnectionWrapper.connection.on('streamEnd', () => socket.emit('streamEnd'));
-
-        // Redirect message events
-        tiktokConnectionWrapper.connection.on('roomUser', msg => socket.emit('roomUser', msg));
-        tiktokConnectionWrapper.connection.on('member', msg => socket.emit('member', msg));
-        tiktokConnectionWrapper.connection.on('chat', msg => socket.emit('chat', msg));
-        tiktokConnectionWrapper.connection.on('gift', msg => socket.emit('gift', msg));
-        tiktokConnectionWrapper.connection.on('social', msg => socket.emit('social', msg));
-        tiktokConnectionWrapper.connection.on('like', msg => socket.emit('like', msg));
-        tiktokConnectionWrapper.connection.on('questionNew', msg => socket.emit('questionNew', msg));
-        tiktokConnectionWrapper.connection.on('linkMicBattle', msg => socket.emit('linkMicBattle', msg));
-        tiktokConnectionWrapper.connection.on('linkMicArmies', msg => socket.emit('linkMicArmies', msg));
-        tiktokConnectionWrapper.connection.on('liveIntro', msg => socket.emit('liveIntro', msg));
-        tiktokConnectionWrapper.connection.on('emote', msg => socket.emit('emote', msg));
-        tiktokConnectionWrapper.connection.on('envelope', msg => socket.emit('envelope', msg));
-        tiktokConnectionWrapper.connection.on('subscribe', msg => socket.emit('subscribe', msg));
-    });
-
+    await emitPushNewPlayers(3, 100)
+    // Handle socket disconnection
     socket.on('disconnect', () => {
-        if (tiktokConnectionWrapper) {
-            tiktokConnectionWrapper.disconnect();
-        }
+        console.log(`User disconnected: ${socket.id}`);
     });
 });
+const emitPushNewPlayers = async (maxPlayerBetPerGame, maxPlayerPerGame) => {
 
-// Emit global connection statistics
-setInterval(() => {
-    io.emit('statistic', { globalConnectionCount: getGlobalConnectionCount() });
-}, 5000)
+    try {
+        const playersData = await getPlayers(maxPlayerBetPerGame, maxPlayerPerGame);
 
-// Serve frontend files
+        // Emit the players' data to the connected client
+        io.emit('players', playersData);
+    } catch (error) {
+        console.error(error);
+    }
+}
+const prisma = new PrismaClient();
+
+const startListineng = () => {
+    let tiktokConnectionWrapper;
+    let tryCount = 0
+    // Connect to the given username
+    try {
+        console.log("connecting");
+        tiktokConnectionWrapper = new TikTokConnectionWrapper("@nature_in_megapolis", {}, false);
+        tiktokConnectionWrapper.connect(true);
+    } catch (err) {
+        console.log("Disconnected");
+    }
+
+    // Redirect wrapper control events once
+    tiktokConnectionWrapper.once('connected', state => {
+        console.log("connected");
+    });
+    tiktokConnectionWrapper.once('disconnected', reason => {
+        console.log("disconnected");
+    });
+
+    // Notify client when stream ends
+    tiktokConnectionWrapper.connection.on('streamEnd', () => {
+        console.log("streamEnd");
+    });
+
+    tiktokConnectionWrapper.connection.on('gift', async msg => {
+        await prisma.tiktok_gifts.create({
+            data: {
+                data: msg,
+                describe: msg.describe,
+                diamondCount: msg.diamondCount,
+                giftId: msg.giftId,
+                giftName: msg.giftName,
+                giftPictureUrl: msg.giftPictureUrl,
+                giftType: msg.giftType,
+                msgId: msg.msgId,
+                nickname: msg.nickname,
+                profilePictureUrl: msg.profilePictureUrl,
+                receiverUserId: msg.receiverUserId,
+                secUid: msg.secUid,
+                timestamp: new Date(msg.timestamp),
+                uniqueId: msg.uniqueId,
+                userId: msg.uniqueId,
+            }
+        })
+        emitPushNewPlayers(3, 100)
+    });
+}
+// startListineng()
 app.use(express.static('public'));
+app.get('/start-listening', async (req, res) => {
+    try {
+        startListineng()
+        return res.json({
+            message: "Starting"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.json("error")
+    }
+})
+app.get('/players', async (req, res) => {
+    try {
+        const _maxPlayerBetPerGame = parseInt(req.query.maxPlayerBetPerGame)
+        const _maxPlayerPerGame = parseInt(req.query.maxPlayerPerGame)
 
-// Start http listener
+        const maxPlayerBetPerGame = _maxPlayerBetPerGame > 0 ? _maxPlayerBetPerGame : 3
+        const maxPlayerPerGame = _maxPlayerPerGame > 0 ? _maxPlayerPerGame : 100
+
+        const result = await getPlayers(maxPlayerBetPerGame, maxPlayerPerGame)
+        return res.json(result)
+    } catch (error) {
+        console.log(error);
+        return res.json("error")
+    }
+})
+
+
+
 const port = process.env.PORT || 8081;
 httpServer.listen(port);
 console.info(`Server running! Please visit http://localhost:${port}`);
+
+
+
+
+async function getPlayers(maxPlayerBetPerGame, maxPlayerPerGame) {
+    return prisma.$queryRaw`
+            WITH RankedGifts AS (
+                SELECT
+                    "msgId",
+                    "giftId",
+					"userId",
+					"nickname",
+					"profilePictureUrl",
+                    "describe",
+                    "giftName",
+                    "diamondCount",
+                    TIMEZONE('Asia/Manila', "timestamp") as "timestamp",
+                    ROW_NUMBER() OVER (PARTITION BY "uniqueId" ORDER BY "timestamp" ASC) AS row_num
+                FROM
+                    public.tiktok_gifts
+                )
+            SELECT
+                "msgId",
+				"giftId",
+				"userId",
+				"nickname",
+				"profilePictureUrl",
+				"describe",
+				"giftName",
+				"diamondCount",
+                "timestamp"
+            FROM
+                RankedGifts
+            WHERE
+                row_num <= ${maxPlayerBetPerGame}
+            ORDER BY "timestamp" ASC
+            LIMIT ${maxPlayerPerGame};
+        `;
+}

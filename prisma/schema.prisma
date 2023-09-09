@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tiktok_gifts {
+  id                Int      @id @default(autoincrement())
+  msgId             String
+  giftId            Int
+  secUid            String
+  userId            String
+  describe          String
+  giftName          String
+  giftType          Int
+  nickname          String
+  uniqueId          String
+  timestamp         DateTime @db.Timestamptz()
+  diamondCount      Int
+  giftPictureUrl    String
+  receiverUserId    String
+  profilePictureUrl String
+  data              Json
+  gameId            Int?
+  game              games?   @relation(fields: [gameId], references: [id])
+}
+
+model games {
+  id        Int            @id @default(autoincrement())
+  winner_id String?
+  timestamp DateTime       @default(now()) @db.Timestamptz()
+  players   tiktok_gifts[]
+}
