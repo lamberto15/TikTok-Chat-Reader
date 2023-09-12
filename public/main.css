@@ -1,0 +1,107 @@
+/* Reset default margin and padding */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Apply a background color and text color to the body */
+body {
+  background-color: #f0f0f0; /* Change to your preferred background color */
+  color: #333; /* Change to your preferred text color */
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
+}
+
+.column {
+  flex: 1;
+  margin: 10px;
+  background-color: #fff; /* Change to your preferred background color */
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+  box-sizing: border-box;
+}
+
+.column h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.column ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.column ul li {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+/* Apply specific styling to the wheel container */
+.wheel-container {
+  text-align: center;
+  align-content: flex-start;
+  position: relative;
+}
+
+.arrow-container {
+  position: absolute;
+  top: -300px; /* Adjust the top value to position the arrow above the wheel */
+  left: 50%; /* Adjust this value to horizontally position the arrow */
+  transform: translateX(-50%); /* Center the arrow horizontally within its container */
+}
+
+/* Style the wheel button */
+.canvas-button {
+  background-color: #0074cc;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.canvas-button:hover {
+  background-color: #005aa8; /* Change color on hover */
+}
+
+/* Style the winners list */
+.column:last-child {
+  background-color: #f5f5f5; /* Change to your preferred background color */
+}
+
+/* Additional styling can be added as needed */
+.column-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: flex-start;
+}
+
+.center-text {
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Style for the arrow container */
+.arrow-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Stack arrow and wheel vertically */
+  margin-bottom: 20px; /* Add margin to separate it from the wheel */
+  height: 100%; /* Make the container take up full height */
+}

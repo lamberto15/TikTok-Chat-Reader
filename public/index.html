@@ -1,18 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TikTok LIVE Chat Reader (Demo)</title>
-
-    <!-- Add your other meta tags, styles, and scripts as needed -->
-
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wheel of Names</title>
+    <link rel="stylesheet" href="main.css" type="text/css" />
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"
       crossorigin="anonymous"
@@ -20,103 +12,23 @@
     ></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="js/Winwheel.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
   </head>
+  <!--v1.0.7-->
+
   <body>
-    <button id="ongoingBtn">Set game to ongoing</button>
-    <button id="doneBtn">Save result</button>
-    <h3>Winner</h3>
-    <ul id="winnerUL"></ul>
-    <h3>Ongoing players</h3>
-    <ul id="ongoingUL"></ul>
-    <h3>Next players</h3>
-    <ul id="playerUL"></ul>
+    <div class="container">
+      <div class="arrow-container">
+        <img src="./resources/arrow.png" />
+      </div>
+      <div class="wheel-container">
+        <td width="438" height="582" class="the_wheel">
+          <canvas id="canvas" width="800" height="800"></canvas>
+        </td>
+      </div>
+    </div>
 
-    <script>
-      const socket = io({
-        path: "/admin",
-      });
-      let currentGameId = null;
-      let ongoingGameId = null;
-      let playerDataList = [];
-      let ongoingPlayerDataList = [];
-      let winnerDataList = [];
-
-      const playerUL = document.getElementById("playerUL");
-      const winnerUL = document.getElementById("winnerUL");
-      const ongoingUL = document.getElementById("ongoingUL");
-      const ongoingBtn = document.getElementById("ongoingBtn");
-      const doneBtn = document.getElementById("doneBtn");
-
-      socket.on("winners", (data) => {
-        console.log(data);
-        const newItems = data.filter(
-          (item) => !winnerDataList.includes(item.userId)
-        );
-
-        newItems.forEach((item) => {
-          winnerDataList.push(item.userId);
-          const li = document.createElement("li");
-          li.textContent = item.userId;
-          winnerUL.prepend(li);
-        });
-      });
-
-      socket.on("ongoing players", (data) => {
-        ongoingGameId = data.game ? data.game.id : null;
-        ongoingPlayerDataList = data.players;
-
-        ongoingUL.innerHTML = "";
-        ongoingPlayerDataList.forEach((item) => {
-          const li = document.createElement("li");
-          li.textContent = item.userId;
-          ongoingUL.appendChild(li);
-        });
-      });
-
-      socket.on("players", (data) => {
-        const { game, players } = data;
-
-        currentGameId = game ? game.id : null;
-        const newItems = players.filter(
-          (item) =>
-            !playerDataList.find((_player) => _player.msgId === item.msgId)
-        );
-
-        newItems.forEach((item) => {
-          playerDataList.push(item);
-          const li = document.createElement("li");
-          li.textContent = item.userId;
-          playerUL.appendChild(li);
-        });
-      });
-
-      ongoingBtn.addEventListener("click", async () => {
-        try {
-          await axios.post("/games", {
-            id: currentGameId,
-            status: "ongoing",
-          });
-          playerUL.innerHTML = "";
-        } catch (error) {
-          console.log(error);
-        }
-      });
-
-      doneBtn.addEventListener("click", async () => {
-        try {
-          await axios.post("/games", {
-            id: ongoingGameId,
-            winnerId: ongoingPlayerDataList[0].msgId,
-            status: "done",
-          });
-
-          ongoingGameId = null;
-          ongoingPlayerDataList = [];
-          ongoingUL.innerHTML = "";
-        } catch (error) {
-          console.log(error);
-        }
-      });
-    </script>
+    <script type="text/javascript" src="js/WheelScript.js"></script>
   </body>
 </html>

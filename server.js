@@ -18,8 +18,7 @@ app.use(express.json())
 const io = new Server(httpServer, {
     cors: {
         origin: '*'
-    },
-    path: "/admin"
+    }
 });
 
 // Socket.IO connection event
