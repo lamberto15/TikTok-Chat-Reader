@@ -11,9 +11,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum GameStatus {
+  open
+  ongoing
+  done
+  invalid
+}
+
 model tiktok_gifts {
   id                Int      @id @default(autoincrement())
-  msgId             String
+  msgId             String   @unique
   giftId            Int
   secUid            String
   userId            String
@@ -29,12 +36,21 @@ model tiktok_gifts {
   profilePictureUrl String
   data              Json
   gameId            Int?
+  updated_at        DateTime @default(now()) @db.Timestamptz()
+  isWinner          Boolean? @default(false)
   game              games?   @relation(fields: [gameId], references: [id])
+
+  @@index([gameId])
+  @@index([msgId])
+  @@index([timestamp])
 }
 
 model games {
-  id        Int            @id @default(autoincrement())
-  winner_id String?
-  timestamp DateTime       @default(now()) @db.Timestamptz()
-  players   tiktok_gifts[]
+  id         Int            @id @default(autoincrement())
+  created_at DateTime       @default(now()) @db.Timestamptz()
+  updated_at DateTime       @default(now()) @db.Timestamptz()
+  status     GameStatus?
+  players    tiktok_gifts[]
+
+  @@index([created_at])
 }

@@ -10,6 +10,7 @@
     "nodemon": "^3.0.1",
     "prisma": "^5.2.0",
     "socket.io": "^4.4.1",
-    "tiktok-live-connector": "^1.0.0"
+    "tiktok-live-connector": "^1.0.0",
+    "yup": "^1.2.0"
   }
 }

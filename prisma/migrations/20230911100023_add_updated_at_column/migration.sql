@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "tiktok_gifts" ADD COLUMN     "updated_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
