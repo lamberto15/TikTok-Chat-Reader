@@ -71,7 +71,7 @@ const startListineng = () => {
     // Connect to the given username
     try {
         console.log("connecting");
-        tiktokConnectionWrapper = new TikTokConnectionWrapper("@stellajero16", {}, false);
+        tiktokConnectionWrapper = new TikTokConnectionWrapper("@poushiglaz", {}, false);
         tiktokConnectionWrapper.connect(true);
     } catch (err) {
         console.log("Disconnected");
@@ -107,7 +107,6 @@ const startListineng = () => {
                 })
 
                 gameId = existingOpenGame ? existingOpenGame.id : null
-
                 if (!existingOpenGame) {
                     const newGame = await tx.games.create({
                         data: {

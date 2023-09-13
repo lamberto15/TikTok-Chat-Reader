@@ -71,7 +71,9 @@ class WheelGame {
     }
 
     async startSpin() {
+        console.log(this.players)
         const numSegments = this.players.length;
+
         const segments = this.players.map((player) => ({
             fillStyle: '#' + Math.floor(Math.random() * 16777215).toString(16),
             text: player.userId,
@@ -95,7 +97,6 @@ class WheelGame {
                 'callbackFinished': await this.alertPrize.bind(this),
             }
         });
-        console.log("dsaddasdssadas");
         this.theWheel.startAnimation();
     }
 
@@ -173,13 +174,9 @@ setInterval(async () => {
         if (currentGameId) {
             await toggleGameOngoing()
             await sleep()
-            const myplayer = []
-            for (let i = 0; i < 100; i++) {
-                myplayer.push(ongoingPlayerDataList[i])
-            }
-            const wheel = new WheelGame(ongoingGameId, myplayer)
+
+            const wheel = new WheelGame(ongoingGameId, ongoingPlayerDataList)
             await wheel.startSpin()
-            console.log("asdasdas");
             currentGameId = null
             ongoingPlayerDataList = []
         }
@@ -189,4 +186,4 @@ setInterval(async () => {
     }
 
 
-}, 5_000)
+}, 20_000)
