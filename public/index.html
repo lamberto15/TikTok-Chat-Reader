@@ -1,34 +1,80 @@
 <!DOCTYPE html>
 <html lang="en" class="no-js">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Wheel of Names</title>
-    <link rel="stylesheet" href="main.css" type="text/css" />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="text/javascript" src="js/Winwheel.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-  </head>
-  <!--v1.0.7-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wheel of Names</title>
+  <link rel="stylesheet" href="main.css" type="text/css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
 
-  <body>
-    <div class="container">
-      <div class="arrow-container">
-        <img src="./resources/arrow.png" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" src="js/Winwheel.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+</head>
+<!--v1.0.7-->
+
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <header class="simple-header">
+    <h1 class="header-title">PAK BETS</h1>
+    <button id="startListening">START</button>
+  </header>
+  <div class="container">
+    <div class="row">
+      <div class="flex-container">
+        <!-- First Column - List of Players -->
+        <div class="column">
+          <h2 id="listOfPlayers">List of Players</h2>
+          <div class="scroll-container">
+            <ul id="playerUL">
+              <!-- Leave this empty; it will be populated dynamically -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Assuming there's a Second Column - just for demonstration -->
+        <div class="column">
+          <h2 id="lisOfWinners">List of Winners</h2>
+          <div class="scroll-container">
+            <ul class="winnerList" id="winnerUL">
+              <!-- Add more winners as needed -->
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="wheel-container">
-        <td width="438" height="582" class="the_wheel">
-          <canvas id="canvas" width="800" height="800"></canvas>
-        </td>
+
+      <!-- Second Column - Wheel Spin -->
+
+      <div class="column column-center">
+        <div style="align-content: center; display: flex;">
+          <h1 id="pakWheel">Pak Wheel</h1>
+        </div>
+        <div class="arrow-container">
+          <img src="./resources/arrow.png" />
+        </div>
+        <div class="wheel">
+          <div class="container">
+            <div class="wheel-container">
+              <td width="438" height="582" class="the_wheel">
+                <canvas id="canvas" width="800" height="800"></canvas>
+              </td>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="third-container">
+        <div class="third-column"></div>
       </div>
     </div>
+  </div>
 
-    <script type="text/javascript" src="js/WheelScript.js"></script>
-  </body>
+  <script type="text/javascript" src="js/WheelScript.js"></script>
+</body>
+
 </html>

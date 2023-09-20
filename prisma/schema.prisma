@@ -39,6 +39,8 @@ model tiktok_gifts {
   updated_at        DateTime @default(now()) @db.Timestamptz()
   isWinner          Boolean? @default(false)
   game              games?   @relation(fields: [gameId], references: [id])
+  payoutStatus      Boolean? @default(false)
+  payoutAmount      Int?
 
   @@index([gameId])
   @@index([msgId])

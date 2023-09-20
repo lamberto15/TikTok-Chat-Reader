@@ -71,7 +71,7 @@ const startListineng = () => {
     // Connect to the given username
     try {
         console.log("connecting");
-        tiktokConnectionWrapper = new TikTokConnectionWrapper("@poushiglaz", {}, false);
+        tiktokConnectionWrapper = new TikTokConnectionWrapper("@pak.bets", {}, false);
         tiktokConnectionWrapper.connect(true);
     } catch (err) {
         console.log("Disconnected");
@@ -148,7 +148,9 @@ const startListineng = () => {
         }
     });
 }
-// startListineng()
+
+startListineng()
+
 app.use(express.static('public'));
 
 app.get(
@@ -187,8 +189,12 @@ app.get('/players', async (req, res) => {
 
 app.post('/games', validate(gameSchema), async (req, res) => {
     try {
-        const { id, winnerId, status } = req.body
-
+        const { id, winnerId, status, msgIds } = req.body
+        if (status === 'ongoing' && !Array.isArray(msgIds)) {
+            return res.json({
+                message: 'msgIds is required'
+            })
+        }
         if (status === 'done' && !winnerId) {
             return res.json({
                 message: 'winnerId is required'
@@ -376,7 +382,9 @@ function getWinners() {
             giftName: true,
             diamondCount: true,
             timestamp: true,
-            updated_at: true
+            updated_at: true,
+            payoutStatus: true,
+            payoutAmount: true
         },
         where: {
             isWinner: true
